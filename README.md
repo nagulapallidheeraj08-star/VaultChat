@@ -118,6 +118,42 @@ Open `http://localhost:3000`.
 - **Browser cache dependency** — Embedding model downloads ~90 MB on first visit; cached via browser Cache API
 - **Ollama must be local** — Only `http://127.0.0.1:11434` supported; no remote Ollama or OpenAI-compatible endpoints
 
+## Known Issues & Fixes
+
+### Browser Extension Interference (Hydration Mismatch)
+Password manager extensions (Bitwarden, 1Password, etc.) inject attributes like `bis_register` into `<body>` before React hydrates, causing:
+```
+A tree hydrated but some attributes of the server rendered HTML didn't match...
+```
+**Fix**: Disable the extension for `localhost:3000` or use incognito mode. The app works correctly — this is purely a hydration warning.
+
+### Ollama CORS Error
+If you see `Cross-Origin Request Blocked` when calling `http://127.0.0.1:11434`:
+```bash
+# Set allowed origin and restart Ollama
+$env:OLLAMA_ORIGINS = "http://localhost:3000"  # PowerShell
+ollama serve
+```
+Or add to your shell profile (`.bashrc`, `.zshrc`, etc.):
+```bash
+export OLLAMA_ORIGINS="http://localhost:3000"
+```
+
+### Port 11434 Already in Use
+```bash
+# Find and kill the process
+netstat -ano | findstr :11434
+taskkill /PID <PID> /F
+
+# Or run Ollama on a different port
+$env:OLLAMA_HOST = "127.0.0.1:11435"
+ollama serve
+```
+
+## Demo
+
+[Screen recording](https://drive.google.com/file/d/1ogb40m0ICHPajp85dm4Z70xx8dKge3ZD/view?usp=drive_link) (Google Drive)
+
 ## License
 
 MIT — see [LICENSE](LICENSE) for details. Copyright (c) 2026 Nagulapalli Dheeraj
