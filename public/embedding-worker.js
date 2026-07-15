@@ -3,7 +3,7 @@ import { pipeline, env } from "@huggingface/transformers";
 env.allowLocalModels = false;
 env.useBrowserCache = true;
 
-let embedder: any = null;
+let embedder = null;
 
 async function initEmbedder() {
   if (!embedder) {
@@ -14,7 +14,7 @@ async function initEmbedder() {
   return embedder;
 }
 
-function cosineSimilarity(a: Float32Array, b: Float32Array): number {
+function cosineSimilarity(a, b) {
   let dot = 0;
   let normA = 0;
   let normB = 0;
@@ -45,10 +45,10 @@ self.onmessage = async (event) => {
         const { texts } = payload;
         const embedder = await initEmbedder();
         
-        const embeddings: Float32Array[] = [];
+        const embeddings = [];
         for (let i = 0; i < texts.length; i++) {
           const output = await embedder(texts[i], { pooling: "mean", normalize: true });
-          const embedding = output.data as Float32Array;
+          const embedding = output.data;
           embeddings.push(new Float32Array(embedding));
           
           self.postMessage({
@@ -73,9 +73,9 @@ self.onmessage = async (event) => {
         const embedder = await initEmbedder();
         
         const queryOutput = await embedder(query, { pooling: "mean", normalize: true });
-        const queryEmbedding = queryOutput.data as Float32Array;
+        const queryEmbedding = queryOutput.data;
         
-        const scored = documents.map((doc: any) => ({
+        const scored = documents.map((doc) => ({
           id: doc.id,
           text: doc.text,
           score: cosineSimilarity(queryEmbedding, doc.embedding),
